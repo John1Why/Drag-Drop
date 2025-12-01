@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kanban Board</title>
+</head>
+<body>
+<div class="kanban-container">
+    <div id="to-do" class="column">TO DO</div>
+    <div id="in-progress" class="column">IN PROGRESS</div>
+    <div id="done" class="column">DONE</div>
+</div>
+<input type="text" id="task-input" placeholder="Новая задача...">
+<button onclick="dobavitZadachu()">Создать задачу</button>
+<script >
+    document.addEventListener('DOMContentLoaded', function() {
+    zagruzitZadaniya();
+});
+
+
+let peretaskivaemaiaKartochka = null;
+let kolonki = document.querySelectorAll('.column');
+
+kolonki.forEach(function(kolonka) {
+    kolonka.addEventListener('dragstart', nachaloPeremescheniia);
+    kolonka.addEventListener('dragover', peremeschenieNadKolonkoi);
+    kolonka.addEventListener('drop', otpusknutieKartochki);
+    kolonka.addEventListener('dragenter', vhodVzoniuOtpuskaniia);
+    kolonka.addEventListener('dragleave', vykhodIzZonyOtpuskaniia);
+});
+
+function dobavitZadachu() {
+    let poleVvoda = document.getElementById('task-input');
+    if (!poleVvoda.value.trim()) return;
+    
+    let novayaKartochka = sozdatKartochku(poleVvoda.value);
+    document.getElementById("to-do").appendChild(novayaKartochka);
+    sohranitSostoyanie();
+    poleVvoda.value = '';
+}
+
+function sozdatKartochku(tekst) {
+    let kartochka = document.createElement('div');
+    kartochka.classList.add('card');
+    kartochka.textContent = tekst;
+    kartochka.setAttribute('draggable', true); 
+    kartochka.addEventListener('dragstart', function(event) { 
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', this.id || '');
+        peretaskivaemaiaKartochka = this;
+        setTimeout(function() { this.classList.add('dragging') }, 0); 
+    });
+    kartochka.addEventListener('dragend', function() { 
+        this.classList.remove('dragging'); 
+    });
+    return kartochka;
+}
+
+function nachaloPeremescheniia(event) {}
+
+function peremeschenieNadKolonkoi(event) {
+    event.preventDefault();
+    event.target.classList.add('active-drop-zone');
+}
+
+function vhodVzoniuOtpuskaniia(event) {
+    event.preventDefault();
+    event.target.classList.add('active-drop-zone');
+}
+
+function vykhodIzZonyOtpuskaniia(event) {
+    event.target.classList.remove('active-drop-zone');
+}
+
+function otpusknutieKartochki(event) {
+    event.preventDefault();
+    event.target.classList.remove('active-drop-zone');
+    if(peretaskivaemaiaKartochka.parentNode !== event.target){
+        event.target.appendChild(peretaskivaemaiaKartochka);
+        sohranitSostoyanie();
+    }
+}
+
+
+function sohranitSostoyanie() {
+    let sostoyanie = {};
+    kolonki.forEach(function(kolonka) {
+        sostoyanie[kolonka.id] = Array.from(kolonka.children).map(function(kartochka) {
+            return kartochka.textContent;
+        });
+    });
+    localStorage.setItem('tasksState', JSON.stringify(sostoyanie));
+}
+
+
+function zagruzitZadaniya() {
+    let  sokhranennoeSostoyanieStr = localStorage.getItem('tasksState');
+    if (sokhranennoeSostoyanieStr === null) {
+        return
+    }
+
+    var sokhranennoeSostoyanie = JSON.parse(sokhranennoeSostoyanieStr);
+
+    for (let kolonka in sokhranennoeSostoyanie) {
+        let kartochki = sokhranennoeSostoyanie[kolonka].map(function(tekst) {
+            return sozdatKartochku(tekst);
+        });
+        document.getElementById(kolonka).append.apply(document.getElementById(kolonka), kartochki);
+    }
+}
+</script>
+</body>
+</html>
