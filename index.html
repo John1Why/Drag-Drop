@@ -2,7 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Kanban Board</title>
+    <style>
+        #to-do{
+            flex: content;
+            width: 100px;
+            border: 3px solid red;
+            border-radius: 30px;
+            text-align: center;
+            color: red;
+        }
+        #in-progress{
+            flex: content;
+            width: 100px;
+            border: 3px solid rgb(255, 157, 0);
+            border-radius: 30px;
+            text-align: center;
+            color: rgb(255, 157, 0);
+        }
+        #done{
+            flex: content;
+            width: 100px;
+            border: 3px solid green;
+            border-radius: 30px;
+            text-align: center;
+            color: green;
+        }
+        .kanban-container{
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
 </head>
 <body>
 <div class="kanban-container">
@@ -110,5 +140,4 @@ function zagruzitZadaniya() {
 }
 </script>
 </body>
-
 </html>
